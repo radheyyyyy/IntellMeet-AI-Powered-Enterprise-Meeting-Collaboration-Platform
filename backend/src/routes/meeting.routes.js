@@ -5,19 +5,23 @@ import authorize from "../middlewares/authorize.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 
 import {
-  createMeetingSchema,
-  
+  createMeetingSchema
 } from "../validators/meeting.validator.js";
 
 import {
   createMeetingController,
   getMeetingsController,
   getMeetingController,
+  getMeetingByCodeController,
   joinMeetingController,
+  leaveMeetingController,
+  startMeetingController,
+  endMeetingController,
+  updateMeetingController,
+  deleteMeetingController
 } from "../controllers/meeting.controller.js";
 
-const router =
-  express.Router();
+const router = express.Router();
 
 /*
 |--------------------------------------------------------------------------
@@ -33,9 +37,7 @@ router.post(
     "ADMIN",
     "SUPER_ADMIN"
   ),
-  validate(
-    createMeetingSchema
-  ),
+  validate(createMeetingSchema),
   createMeetingController
 );
 
@@ -45,15 +47,102 @@ router.get(
   getMeetingsController
 );
 
+/*
+|--------------------------------------------------------------------------
+| Meeting Code Route
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/code/:code",
+  authenticate,
+  getMeetingByCodeController
+);
+
+/*
+|--------------------------------------------------------------------------
+| Meeting By ID
+|--------------------------------------------------------------------------
+*/
+
 router.get(
   "/:id",
   authenticate,
   getMeetingController
 );
 
-export default router;
+/*
+|--------------------------------------------------------------------------
+| Meeting Participation
+|--------------------------------------------------------------------------
+*/
+
 router.post(
   "/:id/join",
   authenticate,
   joinMeetingController
 );
+
+router.post(
+  "/:id/leave",
+  authenticate,
+  leaveMeetingController
+);
+
+/*
+|--------------------------------------------------------------------------
+| Meeting Lifecycle
+|--------------------------------------------------------------------------
+*/
+
+router.post(
+  "/:id/start",
+  authenticate,
+  authorize(
+    "MANAGER",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ),
+  startMeetingController
+);
+
+router.post(
+  "/:id/end",
+  authenticate,
+  authorize(
+    "MANAGER",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ),
+  endMeetingController
+);
+
+/*
+|--------------------------------------------------------------------------
+| Meeting Management
+|--------------------------------------------------------------------------
+*/
+
+router.put(
+  "/:id",
+  authenticate,
+  authorize(
+    "MANAGER",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ),
+  updateMeetingController
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorize(
+    "MANAGER",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ),
+  deleteMeetingController
+);
+
+export default router;
