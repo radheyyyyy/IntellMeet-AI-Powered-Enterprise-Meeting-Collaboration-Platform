@@ -26,6 +26,7 @@ export const createMessageController =
     messageType:
       req.body.messageType,
   });
+  
 
       res.status(201).json({
         success: true,
