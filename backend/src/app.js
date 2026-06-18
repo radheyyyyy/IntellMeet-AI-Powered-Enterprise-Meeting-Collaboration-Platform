@@ -104,3 +104,10 @@ app.use(
   "/api/meetings",
   meetingRoutes
 );
+
+import messageRoutes
+  from "./routes/message.routes.js";
+  app.use(
+  "/api/messages",
+  messageRoutes
+);

@@ -262,6 +262,103 @@ export const initSocket = (server) => {
     );
 
     /*
+|--------------------------------------------------------------------------
+| WebRTC Signaling
+|--------------------------------------------------------------------------
+*/
+
+socket.on(
+  "user-ready",
+  (data) => {
+
+    const {
+      meetingId,
+      userId
+    } = data;
+
+    socket.to(
+      `meeting:${meetingId}`
+    ).emit(
+      "user-ready",
+      {
+        socketId:
+          socket.id,
+        userId
+      }
+    );
+  }
+);
+
+socket.on(
+  "offer",
+  (data) => {
+
+    const {
+      targetSocketId,
+      offer,
+      senderId
+    } = data;
+
+    io.to(
+      targetSocketId
+    ).emit(
+      "offer",
+      {
+        offer,
+        senderId,
+        socketId:
+          socket.id
+      }
+    );
+  }
+);
+
+socket.on(
+  "answer",
+  (data) => {
+
+    const {
+      targetSocketId,
+      answer,
+      senderId
+    } = data;
+
+    io.to(
+      targetSocketId
+    ).emit(
+      "answer",
+      {
+        answer,
+        senderId,
+        socketId:
+          socket.id
+      }
+    );
+  }
+);
+
+socket.on(
+  "ice-candidate",
+  (data) => {
+
+    const {
+      targetSocketId,
+      candidate
+    } = data;
+
+    io.to(
+      targetSocketId
+    ).emit(
+      "ice-candidate",
+      {
+        candidate,
+        socketId:
+          socket.id
+      }
+    );
+  }
+);
+    /*
     |--------------------------------------------------------------------------
     | Disconnect
     |--------------------------------------------------------------------------
@@ -290,3 +387,4 @@ export const initSocket = (server) => {
 };
 
 export const getIO = () => io;
+
