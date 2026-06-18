@@ -20,7 +20,6 @@ Thumbs.db
 backend/node_modules/
 backend/.env
 # Socket testing files
-backend/socket-test.js
 backend/socket-test-a.js
 backend/socket-test-b.js
 backend/socket-test.html
