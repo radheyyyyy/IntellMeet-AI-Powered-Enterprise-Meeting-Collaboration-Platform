@@ -1,4 +1,6 @@
 import { Server } from "socket.io";
+import Message from "../models/message.model.js";
+
 
 import {
   addUser,
@@ -109,50 +111,60 @@ export const initSocket = (server) => {
       }
     );
 
-    /*
-    |--------------------------------------------------------------------------
-    | Chat Events
-    |--------------------------------------------------------------------------
-    */
+    
+/*|--------------------------------------------------------------------------
+| Chat Events
+|--------------------------------------------------------------------------
+*/
 
-    socket.on(
-      "send-message",
-      (data) => {
-        const {
-          meetingId,
-          senderId,
-          message,
-        } = data;
+socket.on(
+  "send-message",
+  async (data) => {
+    try {
+      const {
+        meetingId,
+        senderId,
+        message,
+      } = data;
 
-        if (
-          !meetingId ||
-          !senderId ||
-          !message
-        ) {
-          return;
-        }
-
-        const roomName =
-          `meeting:${meetingId}`;
-
-        console.log(
-          "💬 Chat:",
-          senderId,
-          message
-        );
-
-        io.to(roomName).emit(
-          "receive-message",
-          {
-            senderId,
-            message,
-            createdAt:
-              new Date(),
-          }
-        );
+      if (
+        !meetingId ||
+        !senderId ||
+        !message
+      ) {
+        return;
       }
-    );
 
+      const savedMessage =
+        await Message.create({
+          meeting: meetingId,
+          sender: senderId,
+          content: message,
+        });
+
+      const populatedMessage =
+        await Message.findById(
+          savedMessage._id
+        ).populate(
+          "sender",
+          "firstName lastName email"
+        );
+
+      io.to(
+        `meeting:${meetingId}`
+      ).emit(
+        "receive-message",
+        populatedMessage
+      );
+
+    } catch (error) {
+      console.error(
+        "Socket Chat Error:",
+        error
+      );
+    }
+  }
+);
     /*
     |--------------------------------------------------------------------------
     | Typing Indicators

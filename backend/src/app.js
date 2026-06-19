@@ -111,3 +111,10 @@ import messageRoutes
   "/api/messages",
   messageRoutes
 );
+
+import notificationRoutes
+  from "./routes/notification.routes.js";
+  app.use(
+  "/api/notifications",
+  notificationRoutes
+);
