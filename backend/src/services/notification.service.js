@@ -36,7 +36,7 @@ export const markNotificationAsRead =
         isRead: true,
       },
       {
-        new: true,
+        returnDocument: "after"
       }
     );
   };

@@ -27,6 +27,10 @@ router.get(
 
 router.patch(
   "/:id/read",
+  (req, res, next) => {
+    console.log("PATCH ROUTE HIT");
+    next();
+  },
   authenticate,
   markAsReadController
 );

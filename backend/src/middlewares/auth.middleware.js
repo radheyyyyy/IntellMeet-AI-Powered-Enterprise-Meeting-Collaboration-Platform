@@ -7,46 +7,101 @@ const authenticate = async (
   next
 ) => {
   try {
+
     const authHeader =
       req.headers.authorization;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Check Authorization Header
+    |--------------------------------------------------------------------------
+    */
+
     if (
       !authHeader ||
-      !authHeader.startsWith("Bearer ")
+      !authHeader.startsWith(
+        "Bearer "
+      )
     ) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message:
+          "Unauthorized",
       });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extract Token
+    |--------------------------------------------------------------------------
+    */
 
     const token =
       authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_ACCESS_SECRET
-    );
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message:
+          "Token missing",
+      });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verify JWT
+    |--------------------------------------------------------------------------
+    */
+
+    const decoded =
+      jwt.verify(
+        token,
+        process.env
+          .JWT_ACCESS_SECRET
+      );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Find User
+    |--------------------------------------------------------------------------
+    */
 
     const user =
       await User.findById(
         decoded.id
+      ).select(
+        "-password -refreshToken"
       );
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User not found"
+        message:
+          "User not found",
       });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attach User To Request
+    |--------------------------------------------------------------------------
+    */
 
     req.user = user;
 
     next();
+
   } catch (error) {
+
+    console.error(
+      "Auth Middleware Error:",
+      error.message
+    );
+
     return res.status(401).json({
       success: false,
-      message: "Invalid token"
+      message:
+        "Invalid token",
     });
   }
 };

@@ -118,3 +118,10 @@ import notificationRoutes
   "/api/notifications",
   notificationRoutes
 );
+
+import taskRoutes
+  from "./routes/task.routes.js";
+  app.use(
+  "/api/tasks",
+  taskRoutes
+);

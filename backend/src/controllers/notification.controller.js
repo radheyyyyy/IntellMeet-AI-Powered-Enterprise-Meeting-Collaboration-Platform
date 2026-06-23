@@ -61,6 +61,7 @@ export const getNotificationsController =
     }
   };
 
+
 export const markAsReadController =
   async (
     req,
@@ -69,10 +70,24 @@ export const markAsReadController =
   ) => {
     try {
 
+      console.log(
+        "MARK READ CONTROLLER HIT"
+      );
+
+      console.log(
+        "Notification ID:",
+        req.params.id
+      );
+
       const notification =
         await markNotificationAsRead(
           req.params.id
         );
+
+      console.log(
+        "Updated Notification:",
+        notification
+      );
 
       res.json({
         success: true,
@@ -80,6 +95,12 @@ export const markAsReadController =
       });
 
     } catch (error) {
+
+      console.error(
+        "MARK READ ERROR:",
+        error
+      );
+
       next(error);
     }
   };
