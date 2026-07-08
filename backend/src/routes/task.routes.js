@@ -12,8 +12,7 @@ import {
   getTaskAnalyticsController,
   updateTaskStatusController,
   getBoardViewController,
-
-
+  getTeamBoardViewController,
 } from "../controllers/task.controller.js";
 
 const router =
@@ -69,6 +68,41 @@ router.get(
 
 /*
 |--------------------------------------------------------------------------
+| Board View
+|--------------------------------------------------------------------------
+|
+| IMPORTANT:
+| This route MUST be above "/:id"
+| otherwise Express will treat
+| "board" as a task id.
+|
+*/
+
+router.get(
+  "/board",
+  authenticate,
+  getBoardViewController
+);
+
+/*
+|--------------------------------------------------------------------------
+| Update Task Status
+|--------------------------------------------------------------------------
+|
+| This route must also be above
+| generic "/:id" routes to avoid
+| route matching conflicts.
+|
+*/
+
+router.patch(
+  "/:id/status",
+  authenticate,
+  updateTaskStatusController
+);
+
+/*
+|--------------------------------------------------------------------------
 | Get Task By ID
 |--------------------------------------------------------------------------
 */
@@ -103,17 +137,10 @@ router.delete(
   deleteTaskController
 );
 
-
-router.patch(
-  "/:id/status",
-  authenticate,
-  updateTaskStatusController
-);
-
-
 router.get(
-  "/board",
+  "/board/team/:teamId",
   authenticate,
-  getBoardViewController
+  getTeamBoardViewController
 );
+
 export default router;

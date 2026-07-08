@@ -7,6 +7,7 @@ import {
   getTaskAnalytics,
   updateTaskStatus,
   getBoardView,
+  getTeamBoardView,
 
 } from "../services/task.service.js";
 
@@ -237,6 +238,28 @@ export const deleteTaskController =
 
       const board =
         await getBoardView();
+
+      res.json({
+        success: true,
+        board,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+  export const getTeamBoardViewController =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+
+      const board =
+        await getTeamBoardView(
+          req.params.teamId
+        );
 
       res.json({
         success: true,

@@ -152,3 +152,55 @@ export const deleteTask =
       done,
     };
   };
+  export const getTeamBoardView =
+  async (
+    teamId
+  ) => {
+
+    const todo =
+      await Task.find({
+        team: teamId,
+        status: "TODO",
+      })
+      .populate(
+        "assignedTo",
+        "firstName lastName"
+      );
+
+    const inProgress =
+      await Task.find({
+        team: teamId,
+        status: "IN_PROGRESS",
+      })
+      .populate(
+        "assignedTo",
+        "firstName lastName"
+      );
+
+    const review =
+      await Task.find({
+        team: teamId,
+        status: "REVIEW",
+      })
+      .populate(
+        "assignedTo",
+        "firstName lastName"
+      );
+
+    const done =
+      await Task.find({
+        team: teamId,
+        status: "DONE",
+      })
+      .populate(
+        "assignedTo",
+        "firstName lastName"
+      );
+
+    return {
+      todo,
+      inProgress,
+      review,
+      done,
+    };
+  };
