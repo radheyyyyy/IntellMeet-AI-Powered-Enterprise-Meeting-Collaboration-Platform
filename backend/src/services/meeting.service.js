@@ -28,7 +28,8 @@ export const createMeeting = async (
       meetingCode:
         generateMeetingCode(),
 
-      participants: [hostId]
+      participants: [hostId],
+      participantCount: 1
     });
 
   return meeting;
@@ -112,6 +113,8 @@ export const getMeetingById =
     userId
   );
 
+  meeting.participantCount = meeting.participants.length;
+
   await meeting.save();
 
   return meeting;
@@ -135,11 +138,13 @@ export const getMeetingById =
     }
 
     meeting.participants =
-      meeting.participants.filter(
+    meeting.participants.filter(
         (participant) =>
           participant.toString() !==
           userId.toString()
       );
+
+    meeting.participantCount = meeting.participants.length;
 
     await meeting.save();
 
@@ -165,8 +170,9 @@ export const getMeetingById =
     meeting.status =
       "ONGOING";
 
-    meeting.startedAt =
-      new Date();
+    if (!meeting.startedAt) {
+      meeting.startedAt = new Date();
+    }
 
     await meeting.save();
 
@@ -197,13 +203,40 @@ export const getMeetingById =
     );
   }
 
-  meeting.status =
-    "COMPLETED";
+ meeting.status =
+  "COMPLETED";
 
-  meeting.endedAt =
-    new Date();
+meeting.endedAt =
+  new Date();
 
-  await meeting.save();
+/*
+|--------------------------------------------------------------------------
+| Calculate Duration
+|--------------------------------------------------------------------------
+*/
+
+if (meeting.startedAt) {
+
+  meeting.duration =
+    Math.floor(
+      (
+        meeting.endedAt -
+        meeting.startedAt
+      ) / 1000
+    );
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Update Participant Count
+|--------------------------------------------------------------------------
+*/
+
+meeting.participantCount =
+  meeting.participants.length;
+
+await meeting.save();
 
   return meeting;
 };
@@ -273,4 +306,75 @@ export const deleteMeeting =
     }
 
     return meeting;
+  };
+  /*
+|--------------------------------------------------------------------------
+| Meeting Analytics
+|--------------------------------------------------------------------------
+*/
+
+export const getMeetingAnalytics =
+  async () => {
+
+    const totalMeetings =
+      await Meeting.countDocuments();
+
+    const scheduledMeetings =
+      await Meeting.countDocuments({
+        status:
+          "SCHEDULED",
+      });
+
+    const ongoingMeetings =
+      await Meeting.countDocuments({
+        status:
+          "ONGOING",
+      });
+
+    const completedMeetings =
+      await Meeting.countDocuments({
+        status:
+          "COMPLETED",
+      });
+
+    const cancelledMeetings =
+      await Meeting.countDocuments({
+        status:
+          "CANCELLED",
+      });
+
+    return {
+      totalMeetings,
+      scheduledMeetings,
+      ongoingMeetings,
+      completedMeetings,
+      cancelledMeetings,
+    };
+  };
+
+/*
+|--------------------------------------------------------------------------
+| Meeting History
+|--------------------------------------------------------------------------
+*/
+
+export const getMeetingHistory =
+  async () => {
+
+    return await Meeting.find({
+      status:
+        "COMPLETED",
+    })
+      .populate(
+        "host",
+        "firstName lastName"
+      )
+      .populate(
+        "team",
+        "name"
+      )
+      .sort({
+        endedAt: -1,
+      });
+
   };

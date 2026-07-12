@@ -9,7 +9,8 @@ import {
   updateMeeting,
   deleteMeeting,
   getMeetingByCode,
-  
+  getMeetingAnalytics,
+  getMeetingHistory,
 } from "../services/meeting.service.js";
 
 export const createMeetingController =
@@ -212,7 +213,7 @@ export const getMeetingController =
       next(error);
     }
   };
-  export const getMeetingByCodeController =
+export const getMeetingByCodeController =
   async (
     req,
     res,
@@ -227,6 +228,34 @@ export const getMeetingController =
       res.status(200).json({
         success: true,
         meeting
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const getMeetingAnalyticsController =
+  async (req, res, next) => {
+    try {
+      const analytics = await getMeetingAnalytics();
+
+      res.status(200).json({
+        success: true,
+        analytics
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const getMeetingHistoryController =
+  async (req, res, next) => {
+    try {
+      const meetings = await getMeetingHistory();
+
+      res.status(200).json({
+        success: true,
+        meetings
       });
     } catch (error) {
       next(error);

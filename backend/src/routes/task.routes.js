@@ -84,6 +84,12 @@ router.get(
   getBoardViewController
 );
 
+router.get(
+  "/board/team/:teamId",
+  authenticate,
+  getTeamBoardViewController
+);
+
 /*
 |--------------------------------------------------------------------------
 | Update Task Status
@@ -135,12 +141,6 @@ router.delete(
   "/:id",
   authenticate,
   deleteTaskController
-);
-
-router.get(
-  "/board/team/:teamId",
-  authenticate,
-  getTeamBoardViewController
 );
 
 export default router;

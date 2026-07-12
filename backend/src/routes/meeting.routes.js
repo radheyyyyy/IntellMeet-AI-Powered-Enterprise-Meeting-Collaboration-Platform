@@ -18,7 +18,9 @@ import {
   startMeetingController,
   endMeetingController,
   updateMeetingController,
-  deleteMeetingController
+  deleteMeetingController,
+  getMeetingAnalyticsController,
+  getMeetingHistoryController
 } from "../controllers/meeting.controller.js";
 
 const router = express.Router();
@@ -57,6 +59,18 @@ router.get(
   "/code/:code",
   authenticate,
   getMeetingByCodeController
+);
+
+router.get(
+  "/analytics",
+  authenticate,
+  getMeetingAnalyticsController
+);
+
+router.get(
+  "/history",
+  authenticate,
+  getMeetingHistoryController
 );
 
 /*

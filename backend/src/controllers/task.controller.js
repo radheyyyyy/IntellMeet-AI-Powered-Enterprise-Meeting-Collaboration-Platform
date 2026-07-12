@@ -8,12 +8,19 @@ import {
   updateTaskStatus,
   getBoardView,
   getTeamBoardView,
-
 } from "../services/task.service.js";
 
 import {
   createNotification,
 } from "../services/notification.service.js";
+
+import {
+  getIO,
+} from "../socket/index.js";
+
+import {
+  getUserSocket,
+} from "../socket/socketManager.js";
 
 /*
 |--------------------------------------------------------------------------
@@ -36,12 +43,6 @@ export const createTaskController =
             req.user._id,
         });
 
-      /*
-      |--------------------------------------------------------------------------
-      | Create Notification For Assignee
-      |--------------------------------------------------------------------------
-      */
-
       if (task.assignedTo) {
 
         await createNotification({
@@ -57,6 +58,33 @@ export const createTaskController =
           type:
             "TASK",
         });
+
+        const targetSocket =
+          getUserSocket(
+            task.assignedTo.toString()
+          );
+
+        if (targetSocket) {
+
+          getIO()
+            .to(targetSocket)
+            .emit(
+              "receive-notification",
+              {
+                title:
+                  "New Task Assigned",
+
+                message:
+                  `You have been assigned task: ${task.title}`,
+
+                type:
+                  "TASK",
+
+                createdAt:
+                  new Date(),
+              }
+            );
+        }
       }
 
       res.status(201).json({
@@ -68,7 +96,63 @@ export const createTaskController =
       next(error);
     }
   };
+//       /*
+//       |--------------------------------------------------------------------------
+//       | Create Notification For Assignee
+//       |--------------------------------------------------------------------------
+//       */
 
+//       if (task.assignedTo) {
+
+//         await createNotification({
+//           recipient:
+//             task.assignedTo,
+
+//           title:
+//             "New Task Assigned",
+
+//           message:
+//             `You have been assigned task: ${task.title}`,
+
+//           type:
+//             "TASK",
+//         });
+//       }
+
+//       res.status(201).json({
+//         success: true,
+//         task,
+//       });
+
+//     } catch (error) {
+//       next(error);
+//     }
+//   };
+// const targetSocket =
+//   getUserSocket(
+//     task.assignedTo.toString()
+//   );
+
+// if (targetSocket) {
+
+//   getIO()
+//     .to(targetSocket)
+//     .emit(
+//       "receive-notification",
+//       {
+//         title:
+//           "New Task Assigned",
+
+//         message:
+//           `You have been assigned task: ${task.title}`,
+
+//         type: "TASK",
+
+//         createdAt:
+//           new Date(),
+//       }
+//     );
+// }
 /*
 |--------------------------------------------------------------------------
 | Get All Tasks
@@ -157,6 +241,48 @@ export const updateTaskController =
 
 /*
 |--------------------------------------------------------------------------
+| Update Task Status
+|--------------------------------------------------------------------------
+*/
+
+export const updateTaskStatusController =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+
+      const task =
+        await updateTaskStatus(
+          req.params.id,
+          req.body.status
+        );
+
+      const io =
+        req.app.get("io");
+
+      io.emit(
+        "task-status-updated",
+        {
+          taskId: task._id,
+          status: task.status,
+          team: task.team,
+        }
+      );
+
+      res.json({
+        success: true,
+        task,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+
+/*
+|--------------------------------------------------------------------------
 | Delete Task
 |--------------------------------------------------------------------------
 */
@@ -183,7 +309,14 @@ export const deleteTaskController =
       next(error);
     }
   };
-  export const getTaskAnalyticsController =
+
+/*
+|--------------------------------------------------------------------------
+| Task Analytics
+|--------------------------------------------------------------------------
+*/
+
+export const getTaskAnalyticsController =
   async (
     req,
     res,
@@ -204,31 +337,13 @@ export const deleteTaskController =
     }
   };
 
-  export const updateTaskStatusController =
-  async (
-    req,
-    res,
-    next
-  ) => {
-    try {
+/*
+|--------------------------------------------------------------------------
+| Board View
+|--------------------------------------------------------------------------
+*/
 
-      const task =
-        await updateTaskStatus(
-          req.params.id,
-          req.body.status
-        );
-
-      res.json({
-        success: true,
-        task,
-      });
-
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const getBoardViewController =
+export const getBoardViewController =
   async (
     req,
     res,
@@ -248,7 +363,14 @@ export const deleteTaskController =
       next(error);
     }
   };
-  export const getTeamBoardViewController =
+
+/*
+|--------------------------------------------------------------------------
+| Team Board View
+|--------------------------------------------------------------------------
+*/
+
+export const getTeamBoardViewController =
   async (
     req,
     res,

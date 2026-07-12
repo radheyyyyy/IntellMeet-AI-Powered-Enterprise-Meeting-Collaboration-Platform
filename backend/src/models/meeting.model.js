@@ -5,43 +5,47 @@ const meetingSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     description: {
       type: String,
-      default: ""
+      default: "",
     },
 
     team: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
-      required: true
+      required: true,
     },
 
     host: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
     },
 
     meetingCode: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
 
     scheduledAt: {
       type: Date,
-      required: true
+      required: true,
     },
 
     startedAt: {
-      type: Date
+      type: Date,
     },
 
     endedAt: {
-      type: Date
+      type: Date,
+    },
+
+    duration: {
+      type: Number,
+      default: 0,
     },
 
     status: {
@@ -50,26 +54,30 @@ const meetingSchema = new mongoose.Schema(
         "SCHEDULED",
         "ONGOING",
         "COMPLETED",
-        "CANCELLED"
+        "CANCELLED",
       ],
-      default: "SCHEDULED"
+      default: "SCHEDULED",
     },
 
     participants: [
       {
-        type:
-          mongoose.Schema.Types.ObjectId,
-        ref: "User"
-      }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     ],
+
+    participantCount: {
+      type: Number,
+      default: 0,
+    },
 
     recordingUrl: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

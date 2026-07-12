@@ -32,12 +32,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false
-},
-
-    refreshToken: {
-      type: String,
-      default: null,
-      select: false
     },
 
     avatar: {
@@ -63,7 +57,8 @@ const userSchema = new mongoose.Schema(
 
     refreshToken: {
       type: String,
-      default: null
+      default: null,
+      select: false
     },
 
     lastLogin: {

@@ -50,7 +50,7 @@ export const loginUser = async (
   const user =
     await User.findOne({
       email
-    }).select("+password +refreshToken");;
+    }).select("+password +refreshToken");
 
   if (!user) {
     throw new AppError(
@@ -108,14 +108,13 @@ export const refreshAccessToken = async (
     );
 
     const user =
-      await User.findById(
-        decoded.id
-      );
+      await User.findById(decoded.id)
+        .select("+refreshToken");
 
-    if (!user) {
+    if (!user || user.refreshToken !== refreshToken) {
       throw new AppError(
-        "User not found",
-        404
+        "Invalid refresh token",
+        401
       );
     }
 

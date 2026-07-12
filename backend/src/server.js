@@ -17,10 +17,10 @@ import http from "http";
 
 import app from "./app.js";
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/auth.routes.js";
 
-import { initSocket }
-  from "./socket/index.js";
+import {
+  initSocket,
+} from "./socket/index.js";
 
 /*
 |--------------------------------------------------------------------------
@@ -28,17 +28,11 @@ import { initSocket }
 |--------------------------------------------------------------------------
 */
 
-const PORT = process.env.PORT || 5000;
+const PORT =
+  process.env.PORT || 5000;
+
 const server =
   http.createServer(app);
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
-app.use("/api/auth", authRoutes);
 
 /*
 |--------------------------------------------------------------------------
@@ -48,8 +42,15 @@ app.use("/api/auth", authRoutes);
 
 const startServer = async () => {
   try {
-    console.log("🚀 Starting server...");
-    console.log("📦 Mongo URI:", process.env.MONGO_URI);
+
+    console.log(
+      "🚀 Starting server..."
+    );
+
+    console.log(
+      "📦 Mongo URI:",
+      process.env.MONGO_URI
+    );
 
     /*
     |--------------------------------------------------------------------------
@@ -59,32 +60,60 @@ const startServer = async () => {
 
     await connectDB();
 
-    console.log("✅ Database connected successfully");
-    initSocket(server);
-
-console.log(
-  "⚡ Socket.IO Initialized"
-);
+    console.log(
+      "✅ Database connected successfully"
+    );
 
     /*
     |--------------------------------------------------------------------------
-    | Start Express Server
+    | Socket.IO Initialization
     |--------------------------------------------------------------------------
     */
 
-    server.listen(PORT, () => {
-      console.log(`🌐 Server running on port ${PORT}`);
-    });
+    const io =
+      initSocket(server);
+
+    app.set(
+      "io",
+      io
+    );
+
+    console.log(
+      "⚡ Socket.IO Initialized"
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Start Server
+    |--------------------------------------------------------------------------
+    */
+
+    server.listen(
+      PORT,
+      () => {
+
+        console.log(
+          `🌐 Server running on port ${PORT}`
+        );
+
+      }
+    );
 
   } catch (error) {
+
     /*
     |--------------------------------------------------------------------------
     | Startup Error Handling
     |--------------------------------------------------------------------------
     */
 
-    console.error("❌ Startup Error:", error);
+    console.error(
+      "❌ Startup Error:",
+      error
+    );
+
     process.exit(1);
+
   }
 };
 

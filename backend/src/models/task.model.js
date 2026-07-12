@@ -21,6 +21,21 @@ const taskSchema =
         required: true,
       },
 
+      board: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Board"
+      },
+
+      column: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BoardColumn"
+      },
+
+      position: {
+        type: Number,
+        default: 0
+      },
+
       createdBy: {
         type:
           mongoose.Schema.Types.ObjectId,
