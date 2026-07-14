@@ -1,6 +1,11 @@
 import {
   registerUser,
-  loginUser
+  loginUser,
+  refreshAccessToken,
+  logoutUser,
+  createPasswordResetToken,
+  resetPasswordWithToken,
+  changeUserPassword
 } from "../services/auth.service.js";
 
 export const signup =
@@ -79,9 +84,6 @@ export const login =
       next(error);
     }
   };
-  import {
-  refreshAccessToken
-} from "../services/auth.service.js";
 export const refreshToken =
   async (req, res, next) => {
     try {
@@ -102,9 +104,6 @@ export const refreshToken =
       next(error);
     }
   };
-  import {
-  logoutUser
-} from "../services/auth.service.js";
 export const logout =
   async (req, res, next) => {
     try {
@@ -121,3 +120,57 @@ export const logout =
       next(error);
     }
   };
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const resetToken = await createPasswordResetToken(req.body.email);
+    const response = {
+      success: true,
+      message: "If the account exists, password reset instructions have been created."
+    };
+
+    // A mail provider is not configured in this backend yet. This makes local
+    // development testable without exposing reset tokens in production.
+    if (process.env.NODE_ENV !== "production" && resetToken) {
+      response.resetToken = resetToken;
+      response.resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    await resetPasswordWithToken({
+      token: req.params.token,
+      password: req.body.password
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully. Please log in again."
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    await changeUserPassword({
+      userId: req.user._id,
+      currentPassword: req.body.currentPassword,
+      newPassword: req.body.newPassword
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully. Please log in again."
+    });
+  } catch (error) {
+    next(error);
+  }
+};

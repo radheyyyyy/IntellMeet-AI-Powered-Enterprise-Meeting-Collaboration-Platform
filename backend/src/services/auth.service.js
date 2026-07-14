@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import crypto from "crypto";
 
 import AppError from "../utils/AppError.js";
 import jwt from "jsonwebtoken";
@@ -143,4 +144,50 @@ export const logoutUser = async (
   );
 
   return true;
+};
+
+const hashResetToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+export const createPasswordResetToken = async (email) => {
+  const user = await User.findOne({ email });
+
+  // Do not reveal whether an account exists.
+  if (!user) return null;
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresInMinutes = Number(process.env.PASSWORD_RESET_EXPIRE_MINUTES || 30);
+
+  user.passwordResetTokenHash = hashResetToken(token);
+  user.passwordResetExpiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+  await user.save();
+
+  return token;
+};
+
+export const resetPasswordWithToken = async ({ token, password }) => {
+  const user = await User.findOne({
+    passwordResetTokenHash: hashResetToken(token),
+    passwordResetExpiresAt: { $gt: new Date() }
+  }).select("+passwordResetTokenHash +passwordResetExpiresAt");
+
+  if (!user) throw new AppError("Reset token is invalid or expired", 400);
+
+  user.password = await hashPassword(password);
+  user.passwordResetTokenHash = undefined;
+  user.passwordResetExpiresAt = undefined;
+  user.refreshToken = null;
+  await user.save();
+};
+
+export const changeUserPassword = async ({ userId, currentPassword, newPassword }) => {
+  const user = await User.findById(userId).select("+password +refreshToken");
+  if (!user) throw new AppError("User not found", 404);
+
+  const matches = await comparePassword(currentPassword, user.password);
+  if (!matches) throw new AppError("Current password is incorrect", 400);
+
+  user.password = await hashPassword(newPassword);
+  user.refreshToken = null;
+  await user.save();
 };

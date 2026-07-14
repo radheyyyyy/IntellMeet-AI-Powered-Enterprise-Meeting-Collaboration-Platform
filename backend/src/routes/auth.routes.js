@@ -6,13 +6,19 @@ import {
   getMe,
   refreshToken,
   logout,
+  forgotPassword,
+  resetPassword,
+  changePassword
 } from "../controllers/auth.controller.js";
 
 import validate from "../middlewares/validate.middleware.js";
 
 import {
   signupSchema,
-  loginSchema
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema
 } from "../validators/auth.validator.js";
 
 import authenticate from "../middlewares/auth.middleware.js";
@@ -44,6 +50,25 @@ router.post(
   "/logout",
   authenticate,
   logout
+);
+
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  forgotPassword
+);
+
+router.post(
+  "/reset-password/:token",
+  validate(resetPasswordSchema),
+  resetPassword
+);
+
+router.patch(
+  "/change-password",
+  authenticate,
+  validate(changePasswordSchema),
+  changePassword
 );
 
 export default router;
